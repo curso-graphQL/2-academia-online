@@ -81,7 +81,7 @@ createServer(app).listen(
 );
 ~~~
 
-## 5. Espedificación de los tipos de definiciones en el schema
+## 5. Schema
 
 Creamos un directorio *schema* dentro de *src* y en su interior el archivo *schema.graphql* en el que definiremos los tipos que vamos a necesitar en función de los datos que tenemos:
 
@@ -125,4 +125,53 @@ type Valoracion {
   points: Float!
   comment: String
 }
+~~~
+
+## 6. Resolvers
+
+- Creamos una carpeta *resolvers* en *src* con los siguientes archivos:
+
+~~~
+\\query.ts
+import { IResolvers } from 'graphql-tools';
+
+const query: IResolvers = {
+  Query: {
+    estudiantes(): string {
+      return "lista de estudiantes";
+    }
+  }
+}
+
+export default query;
+~~~
+
+
+~~~
+\\resolversMap.ts
+import { IResolvers } from 'graphql-tools';
+import query from './query';
+
+const resolversMap: IResolvers = {
+  ...query
+}
+
+export default resolversMap;
+~~~
+
+- En la carpeta *src/schema* creamos un archivo *index.ts* que contendrá lo siguiente:
+
+~~~
+import { GraphQLSchema } from 'graphql';
+import 'graphql-import-node';
+import { makeExecutableSchema } from 'graphql-tools';
+import typeDefs from './schema.graphql';
+import resolvers from '../resolvers/resolversMap';
+
+const schema: GraphQLSchema = makeExecutableSchema({
+  typeDefs,
+  resolvers
+})
+
+export default schema;
 ~~~
