@@ -138,7 +138,7 @@ import { IResolvers } from 'graphql-tools';
 const query: IResolvers = {
   Query: {
     estudiantes(): string {
-      return "lista de estudiantes";
+      return "lista de estudiantes"; //sólo para testear
     }
   }
 }
@@ -174,4 +174,34 @@ const schema: GraphQLSchema = makeExecutableSchema({
 })
 
 export default schema;
+~~~
+
+## 7. Configurar Apollo Server
+
+Modificamos *server.ts*
+
+~~~
+...
+import { ApolloServer } from 'apollo-server-express';
+import schema from './schema/index';
+import expressPlayGround from 'graphql-playground-middleware-express';
+...
+
+...
+const server = new ApolloServer ({
+  schema,
+  introspection: true
+});
+
+server.applyMiddleware({app});
+
+app.get('/', expressPlayGround({
+  endpoint: '/graphql'
+}));
+
+createServer(app).listen(
+  { port: PORT },
+  () => console.log(`Servidor Academia Online listo http://localhost:${PORT}/graphql`)
+);
+...
 ~~~

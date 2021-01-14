@@ -2,15 +2,28 @@ import express from 'express';
 import compression from 'compression';
 import cors from 'cors';
 import { createServer } from 'http';
+import { ApolloServer } from 'apollo-server-express';
+import schema from './schema/index';
+import expressPlayGround from 'graphql-playground-middleware-express';
 
 const PORT = 5200;
 const app = express();
 
 app.use(cors());
 app.use(compression());
-app.get('/', (req, res) => res.send('Hola a la academia online en GraphQL'));
+
+const server = new ApolloServer ({
+  schema,
+  introspection: true
+});
+
+server.applyMiddleware({app});
+
+app.get('/', expressPlayGround({
+  endpoint: '/graphql'
+}));
 
 createServer(app).listen(
   { port: PORT },
-  () => console.log(`Servidor Academia Online listo http://localhost:${PORT}`)
+  () => console.log(`Servidor Academia Online listo http://localhost:${PORT}/graphql`)
 );
