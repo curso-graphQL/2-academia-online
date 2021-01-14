@@ -80,3 +80,49 @@ createServer(app).listen(
   () => console.log(`Servidor Academia Online listo http://localhost:${PORT}`)
 );
 ~~~
+
+## 5. Espedificación de los tipos de definiciones en el schema
+
+Creamos un directorio *schema* dentro de *src* y en su interior el archivo *schema.graphql* en el que definiremos los tipos que vamos a necesitar en función de los datos que tenemos:
+
+~~~
+type Query {
+  estudiantes: String
+}
+
+type Estudiante {
+  id: ID!
+  name: String!
+  email: String!
+  website: String
+  courses: [Curso!]!
+}
+
+type Curso {
+  id: ID!
+  title: String!
+  description: String
+  clases: Int!
+  time: Float
+  level: Nivel
+  logo: String!
+  path: String!
+  teacher: String!
+  students: [Estudiante!]
+  reviews: [Valoracion!]!
+}
+
+enum Nivel{
+  TODOS
+  NOVATOS
+  INTERMEDIO
+  EXPERTO
+}
+
+type Valoracion {
+  id: ID!
+  name: String!
+  points: Float!
+  comment: String
+}
+~~~
