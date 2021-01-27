@@ -1,5 +1,17 @@
 # Api Academia Online
 
+1. [Creación y configuración de ficheros necesarios](#config)
+2. [Instalación de dependencias](#dependencies)
+3. [Ficheros JSON con la información de cursos](#course-info)
+4. [Creación del servidor node express](#express)
+5. [Schema](#schema)
+6. [Resolvers](#resolvers)
+7. [Configurar Apollo Server](#apollo)
+
+Configurar Apollo Server
+<hr>
+
+<a name="config"></a>
 ## 1. Creación y configuración de ficheros necesarios
 
 - Generamos el *package.json* mediante 
@@ -12,6 +24,7 @@ npm init
 npx tsc --init --rootDir src --outDir build --lib dom,es6 --module commonjs --target es6 --removeComments --resolveJsonModule true
 ~~~
 
+<a name="dependencies"></a>
 ## 2. Instalación de dependencias
 Lista de dependencias que necesitaremos para trabajar en este proyecto:
 - [express](https://www.npmjs.com/package/express)
@@ -30,11 +43,12 @@ Lista de dependencias que necesitaremos para trabajar en este proyecto:
 npm install express graphql ncp http graphql-import-node compression cors lodash typescript graphql-tools graphql-playground-middleware-express apollo-server-express
 ~~~
 
-###Dependencias de desarrollo:
+### Dependencias de desarrollo:
 ~~~
 npm install @types/compression @types/express @types/cors @types/lodash @types/node @types/graphql -D
 ~~~
 
+<a name="course-info"></a>
 ## 3. Ficheros JSON con la información de cursos
 - Creamos la carpeta *src* y dentro de ella otra carpeta *data* donde pondremos los archivos JSON con los datos.
 - Creamos un archivo *data.store.ts* para importar los JSON.
@@ -48,6 +62,8 @@ export const database = {
   estudiantes
 }
 ~~~
+
+<a name="express"></a>
 
 ## 4. Creación del servidor node express
 - Configuramos los scripts del *package.json*
@@ -81,6 +97,7 @@ createServer(app).listen(
 );
 ~~~
 
+<a name="schema"></a>
 ## 5. Schema
 
 Creamos un directorio *schema* dentro de *src* y en su interior el archivo *schema.graphql* en el que definiremos los tipos que vamos a necesitar en función de los datos que tenemos:
@@ -127,6 +144,7 @@ type Valoracion {
 }
 ~~~
 
+<a name="resolvers"></a>
 ## 6. Resolvers
 
 - Creamos una carpeta *resolvers* en *src* con los siguientes archivos:
@@ -176,6 +194,7 @@ const schema: GraphQLSchema = makeExecutableSchema({
 export default schema;
 ~~~
 
+<a name="apollo"></a>
 ## 7. Configurar Apollo Server
 
 Modificamos *server.ts*
