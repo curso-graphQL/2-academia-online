@@ -8,7 +8,7 @@
 6. [Resolvers](#resolvers)
 7. [Configurar Apollo Server](#apollo)
 8. [Resolvers - Queries - Lista de estudiantes](#students)
-
+9. [Resolvers - Queries - Un estudiante](#one-student)
 
 <hr>
 
@@ -290,3 +290,54 @@ Debemos añadir el nuevo resolver a *resolvers/resolverMap.ts*
   }
 ...
 ~~~
+
+<a name="one-student"></a>
+## 9. Resolvers - Queries - Un estudiante
+
+Primero modificamos *schema.graphql* para añadir la query de un solo estudiante:
+
+~~~
+type Query {
+  "Lista de los estudiantes de la academia"
+  estudiantes: [Estudiante!]!,
+  "Información del estudiante de la academia seleccionado por ID"
+  estudiante(id: ID!): Estudiante!!,
+}
+~~~
+
+Luego añadimos el nuevo resolver para obtener un solo estudiante a *resolvers/query.ts*:
+
+~~~
+const query: IResolvers = {
+  Query: {
+    estudiantes(): any {
+      return database.estudiantes;
+    },
+    estudiante(__: void, { id }): any {
+      return database.estudiantes.find( estudiante => estudiante.id === id );
+    }
+  }
+}
+~~~
+
+Con esto ya tenemos disponible la info en la api.
+
+![Imagen2](./images/image2.png)
+
+En caso de que el elemento que buscamos no se encuentre, podemos devolver una respuesta que mantenga el formato que se espera, pero que indique de forma clara que no se han encontrado registros. Para conseguirlo, modificamos el resolver:
+
+~~~
+...
+  estudiante(__: void, { id }): any {
+    const found = database.estudiantes.find( estudiante => estudiante.id === id );
+    return found || {
+      id: -1, 
+      name: `No se ha encontrado el estudiante con ID ${id}`,
+      email: '',
+      courses: []
+    }
+  }
+...
+~~~
+
+![Imagen3](./images/image3.png)
