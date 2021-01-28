@@ -25,5 +25,5 @@ app.get('/', expressPlayGround({
 
 createServer(app).listen(
   { port: PORT },
-  () => console.log(`Servidor Academia Online listo http://localhost:${PORT}/graphql`)
+  () => console.log(`Servidor Academia Online listo http://localhost:${PORT}`)
 );

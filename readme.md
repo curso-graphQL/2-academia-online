@@ -7,8 +7,9 @@
 5. [Schema](#schema)
 6. [Resolvers](#resolvers)
 7. [Configurar Apollo Server](#apollo)
+8. [Resolvers - Queries - Lista de estudiantes](#students)
 
-Configurar Apollo Server
+
 <hr>
 
 <a name="config"></a>
@@ -220,7 +221,72 @@ app.get('/', expressPlayGround({
 
 createServer(app).listen(
   { port: PORT },
-  () => console.log(`Servidor Academia Online listo http://localhost:${PORT}/graphql`)
+  () => console.log(`Servidor Academia Online listo http://localhost:${PORT}`)
 );
+...
+~~~
+
+<a name="students"></a>
+## 8. Resolvers - Queries - Lista de estudiantes
+
+Modificamos en *schema.graphql* la query:
+
+~~~
+type Query {
+  "Lista de los estudiantes de la academia"
+  estudiantes: [Estudiante!]!
+}
+~~~
+
+Igualmente modificamos en *resolvers/query.ts* la constante **query**:
+
+~~~
+const query: IResolvers = {
+  Query: {
+    estudiantes(): any {
+      return database.estudiantes;
+    }
+  }
+}
+~~~
+
+Una vez hecho esto, ya podemos lanzar en apollo server la query a estudiantes estableciendo los parámetros que queremos que nos devuelva.
+
+![Imagen1](./images/image1.png)
+
+Para el caso de querer recuperar la información de los cursos de cada estudiante necesitaremos otro resolver.
+
+Creamos en la carpeta *resolvers* un nuevo archivo *types.ts*:
+
+~~~
+import { IResolvers } from 'graphql-tools';
+import { database } from '../data/data.store';
+import _ from 'lodash';
+
+const type: IResolvers = {
+  Estudiante: {
+    courses: parent => {
+      const cursosLista: any[] = []
+      parent.courses.map((curso: string) => {
+        cursosLista.push(_.find(database.cursos, ['id', curso]))
+      })
+      return cursosLista
+    }
+  }
+}
+
+export default type;
+~~~
+
+Debemos añadir el nuevo resolver a *resolvers/resolverMap.ts*
+
+~~~
+...
+  import type from './type';
+
+  const resolversMap: IResolvers = {
+    ...query,
+    ...type
+  }
 ...
 ~~~
