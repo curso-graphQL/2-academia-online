@@ -18,12 +18,12 @@
 
 ## 1. Creación y configuración de ficheros necesarios
 
-- Generamos el *package.json* mediante 
+Generamos el *package.json* mediante 
 ~~~
 npm init
 ~~~
 
-- Generamos el *tsconfig.json* mediante 
+Generamos el *tsconfig.json* mediante 
 ~~~
 npx tsc --init --rootDir src --outDir build --lib dom,es6 --module commonjs --target es6 --removeComments --resolveJsonModule true
 ~~~
@@ -62,8 +62,9 @@ npm install @types/compression @types/express @types/cors @types/lodash @types/n
 
 ## 3. Ficheros JSON con la información de cursos
 
-- Creamos la carpeta *src* y dentro de ella otra carpeta *data* donde pondremos los archivos JSON con los datos.
-- Creamos un archivo *data.store.ts* para importar los JSON.
+Creamos la carpeta *src* y dentro de ella otra carpeta *data* donde pondremos los archivos JSON con los datos.
+
+Creamos un archivo *data.store.ts* para importar los JSON.
 
 ~~~
 import cursos from './courses.json';
@@ -81,7 +82,7 @@ export const database = {
 
 ## 4. Creación del servidor node express
 
-- Configuramos los scripts del *package.json*
+Configuramos los scripts del *package.json*
 
 ~~~
   "scripts": {
@@ -92,7 +93,7 @@ export const database = {
   },
 ~~~
 
-- Configuramos el servidor node express con los parámetros básicos
+Configuramos el servidor node express con los parámetros básicos
 
 ~~~
 import compression from 'compression';
@@ -168,7 +169,7 @@ type Valoracion {
 
 ## 6. Resolvers
 
-- Creamos una carpeta *resolvers* en *src* con los siguientes archivos:
+Creamos una carpeta *resolvers* en *src* con los siguientes archivos:
 
 ~~~
 \\query.ts
@@ -197,7 +198,7 @@ const resolversMap: IResolvers = {
 export default resolversMap;
 ~~~
 
-- En la carpeta *src/schema* creamos un archivo *index.ts* que contendrá lo siguiente:
+En la carpeta *src/schema* creamos un archivo *index.ts* que contendrá lo siguiente:
 
 ~~~
 import { GraphQLSchema } from 'graphql';
