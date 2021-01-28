@@ -14,7 +14,22 @@ const query: IResolvers = {
         email: '',
         courses: []
       }
-    }
+    },
+    cursos(): any {
+      return database.cursos;
+    },
+    curso(__: void, { id }): any {
+      const found = database.cursos.find( curso => curso.id === id );
+      return found || {
+        id: -1,
+        title: `No se ha encontrado el curso con ID ${id}`,
+        clases: -1,
+        logo: '',
+        path: '',
+        teacher: '',
+        reviews: []
+      }
+    },
   }
 }
 

@@ -7,12 +7,15 @@
 5. [Schema](#schema)
 6. [Resolvers](#resolvers)
 7. [Configurar Apollo Server](#apollo)
-8. [Resolvers - Queries - Lista de estudiantes](#students)
-9. [Resolvers - Queries - Un estudiante](#one-student)
+8. [Obtener la lista de estudiantes](#students)
+9. [Obtener un estudiante con el id indicado](#one-student)
+10. [Obtener la lista de cursos](#courses)
+11. [Obtener un curso con el id indicado](#one-course)
 
 <hr>
 
 <a name="config"></a>
+
 ## 1. Creación y configuración de ficheros necesarios
 
 - Generamos el *package.json* mediante 
@@ -25,8 +28,12 @@ npm init
 npx tsc --init --rootDir src --outDir build --lib dom,es6 --module commonjs --target es6 --removeComments --resolveJsonModule true
 ~~~
 
+<hr>
+
 <a name="dependencies"></a>
+
 ## 2. Instalación de dependencias
+
 Lista de dependencias que necesitaremos para trabajar en este proyecto:
 - [express](https://www.npmjs.com/package/express)
 - [apollo-server-express](https://www.npmjs.com/package/apollo-server-express)
@@ -49,8 +56,12 @@ npm install express graphql ncp http graphql-import-node compression cors lodash
 npm install @types/compression @types/express @types/cors @types/lodash @types/node @types/graphql -D
 ~~~
 
+<hr>
+
 <a name="course-info"></a>
+
 ## 3. Ficheros JSON con la información de cursos
+
 - Creamos la carpeta *src* y dentro de ella otra carpeta *data* donde pondremos los archivos JSON con los datos.
 - Creamos un archivo *data.store.ts* para importar los JSON.
 
@@ -64,9 +75,12 @@ export const database = {
 }
 ~~~
 
+<hr>
+
 <a name="express"></a>
 
 ## 4. Creación del servidor node express
+
 - Configuramos los scripts del *package.json*
 
 ~~~
@@ -98,7 +112,10 @@ createServer(app).listen(
 );
 ~~~
 
+<hr>
+
 <a name="schema"></a>
+
 ## 5. Schema
 
 Creamos un directorio *schema* dentro de *src* y en su interior el archivo *schema.graphql* en el que definiremos los tipos que vamos a necesitar en función de los datos que tenemos:
@@ -145,7 +162,10 @@ type Valoracion {
 }
 ~~~
 
+<hr>
+
 <a name="resolvers"></a>
+
 ## 6. Resolvers
 
 - Creamos una carpeta *resolvers* en *src* con los siguientes archivos:
@@ -164,7 +184,6 @@ const query: IResolvers = {
 
 export default query;
 ~~~
-
 
 ~~~
 \\resolversMap.ts
@@ -195,7 +214,10 @@ const schema: GraphQLSchema = makeExecutableSchema({
 export default schema;
 ~~~
 
+<hr>
+
 <a name="apollo"></a>
+
 ## 7. Configurar Apollo Server
 
 Modificamos *server.ts*
@@ -226,7 +248,10 @@ createServer(app).listen(
 ...
 ~~~
 
+<hr>
+
 <a name="students"></a>
+
 ## 8. Resolvers - Queries - Lista de estudiantes
 
 Modificamos en *schema.graphql* la query:
@@ -291,7 +316,10 @@ Debemos añadir el nuevo resolver a *resolvers/resolverMap.ts*
 ...
 ~~~
 
+<hr>
+
 <a name="one-student"></a>
+
 ## 9. Resolvers - Queries - Un estudiante
 
 Primero modificamos *schema.graphql* para añadir la query de un solo estudiante:
@@ -340,4 +368,97 @@ En caso de que el elemento que buscamos no se encuentre, podemos devolver una re
 ...
 ~~~
 
+<hr>
+
 ![Imagen3](./images/image3.png)
+
+<a name="courses"></a>
+
+## 10. Obtener la lista de cursos
+
+Prodedemos de igual forma que hicimos para la lista de estudiantes: Primero modificamos la query en el schema.
+
+~~~
+type Query {
+  "Lista de los estudiantes de la academia"
+  estudiantes: [Estudiante!]!,
+  "Información del estudiante de la academia seleccionado por ID"
+  estudiante(id: ID!): Estudiante!,
+  "Lista de los cursos de la academia"
+  cursos: [Curso!]!
+}
+~~~
+
+Luego modificamos el resolver en *query.ts*:
+
+~~~
+const query: IResolvers = {
+  Query: {
+  ...
+    cursos(): any {
+      return database.cursos;
+    },
+  ...
+~~~
+
+Vamos también a añadir un nuevo resolver para poder obtener los estudiantes que están inscritos a un curso. Para ello modificamos *resolvers/type.ts*:
+
+~~~
+const type: IResolvers = {
+  ...
+  Curso: {
+    students: parent => {
+      const estudiantesLista: any[] = []
+      if (parent.students) {
+        parent.students.map((estudiante: string) => {
+          estudiantesLista.push(_.find(database.estudiantes, ['id', estudiante]))
+        })
+      }
+      return estudiantesLista
+    }
+  }
+}
+~~~
+
+Como en este caso, los estudiantes de un curso no es un parámetro obligatorio, contemplamos el caso en el que parent.students sea undefined.
+
+<hr>
+
+<a name="one-course"></a>
+
+## 11. Obtener un curso con el id indicado
+
+Procedemos de la misma forma, modificando primero el schema:
+
+~~~
+type Query {
+  ...
+  "Información del curso de la academia seleccionado por ID"
+  curso(id: ID!): Curso!,
+}
+~~~
+
+Luego modificamos el resolver:
+
+~~~
+const query: IResolvers = {
+  Query: {
+    ...
+    curso(__: void, { id }): any {
+      const found = database.cursos.find( curso => curso.id === id );
+      return found || {
+        id: -1,
+        title: `No se ha encontrado el curso con ID ${id}`,
+        clases: -1,
+        logo: '',
+        path: '',
+        teacher: '',
+        reviews: []
+      }
+    },
+  }
+}
+~~~
+
+
+
