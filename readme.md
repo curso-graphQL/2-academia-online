@@ -447,24 +447,24 @@ const query: IResolvers = {
 
 ## 12. Lista de estudiantes de los cursos
 
-
 Vamos también a añadir un nuevo resolver para poder obtener los estudiantes que están inscritos a un curso. Para ello modificamos *resolvers/type.ts*:
 
 ~~~
 const type: IResolvers = {
   ...
-  Curso: {
+Curso: {
     students: parent => {
       const estudiantesLista: any[] = []
-      if (parent.students) {
-        parent.students.map((estudiante: string) => {
-          estudiantesLista.push(_.find(database.estudiantes, ['id', estudiante]))
-        })
-      }
+      database.estudiantes.map( (estudiante: any) => {
+        if (!!estudiante.courses.find( (course: string) => course === parent.id)) {
+          estudiantesLista.push(estudiante)
+        }
+      });
       return estudiantesLista
-    }
-  }
-}
+    },
+    path: parent => `http://www.udemy.com${parent.path}`  }
 ~~~
 
 Como en este caso, los estudiantes de un curso no es un parámetro obligatorio, contemplamos el caso en el que parent.students sea undefined.
+
+Adicionalmente hemos modificado cómo se entrega la información del path del curso para incluir la url completa:

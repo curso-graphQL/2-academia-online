@@ -15,13 +15,14 @@ const type: IResolvers = {
   Curso: {
     students: parent => {
       const estudiantesLista: any[] = []
-      if (parent.students) {
-        parent.students.map((estudiante: string) => {
-          estudiantesLista.push(_.find(database.estudiantes, ['id', estudiante]))
-        })
-      }
+      database.estudiantes.map( (estudiante: any) => {
+        if (!!estudiante.courses.find( (course: string) => course === parent.id)) {
+          estudiantesLista.push(estudiante)
+        }
+      });
       return estudiantesLista
-    }
+    },
+    path: parent => `http://www.udemy.com${parent.path}`
   }
 }
 
