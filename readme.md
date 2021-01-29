@@ -11,6 +11,7 @@
 9. [Obtener un estudiante con el id indicado](#one-student)
 10. [Obtener la lista de cursos](#courses)
 11. [Obtener un curso con el id indicado](#one-course)
+12. [Lista de estudiantes de los cursos](#students-from-course)
 
 <hr>
 
@@ -402,27 +403,6 @@ const query: IResolvers = {
   ...
 ~~~
 
-Vamos también a añadir un nuevo resolver para poder obtener los estudiantes que están inscritos a un curso. Para ello modificamos *resolvers/type.ts*:
-
-~~~
-const type: IResolvers = {
-  ...
-  Curso: {
-    students: parent => {
-      const estudiantesLista: any[] = []
-      if (parent.students) {
-        parent.students.map((estudiante: string) => {
-          estudiantesLista.push(_.find(database.estudiantes, ['id', estudiante]))
-        })
-      }
-      return estudiantesLista
-    }
-  }
-}
-~~~
-
-Como en este caso, los estudiantes de un curso no es un parámetro obligatorio, contemplamos el caso en el que parent.students sea undefined.
-
 <hr>
 
 <a name="one-course"></a>
@@ -461,5 +441,30 @@ const query: IResolvers = {
 }
 ~~~
 
+<hr>
+
+<a name="students-from-course"></a>
+
+## 12. Lista de estudiantes de los cursos
 
 
+Vamos también a añadir un nuevo resolver para poder obtener los estudiantes que están inscritos a un curso. Para ello modificamos *resolvers/type.ts*:
+
+~~~
+const type: IResolvers = {
+  ...
+  Curso: {
+    students: parent => {
+      const estudiantesLista: any[] = []
+      if (parent.students) {
+        parent.students.map((estudiante: string) => {
+          estudiantesLista.push(_.find(database.estudiantes, ['id', estudiante]))
+        })
+      }
+      return estudiantesLista
+    }
+  }
+}
+~~~
+
+Como en este caso, los estudiantes de un curso no es un parámetro obligatorio, contemplamos el caso en el que parent.students sea undefined.
