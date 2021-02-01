@@ -12,6 +12,12 @@
 10. [Obtener la lista de cursos](#courses)
 11. [Obtener un curso con el id indicado](#one-course)
 12. [Lista de estudiantes de los cursos](#students-from-course)
+13. [Mutations: Primeros pasos](#mutations)
+14. [Definición del input CursoInput](#input)
+15. [Añadir un nuevo curso](#new-course)
+16. [Validaciones para no duplicar datos](#validations)
+17. [Modificar un curso](#modify-course)
+18. [Eliminar un curso](#delete-course)
 
 <hr>
 
@@ -468,3 +474,178 @@ Curso: {
 Como en este caso, los estudiantes de un curso no es un parámetro obligatorio, contemplamos el caso en el que parent.students sea undefined.
 
 Adicionalmente hemos modificado cómo se entrega la información del path del curso para incluir la url completa:
+
+<hr>
+
+<a name="mutations"></a>
+
+## 13. Mutations: primeros pasos
+
+Una vez hemos terminado de configurar las **queries** para obtener datos, vamos a empezar a configurar los **mutations** para poder añadir nuevos datos.
+
+En *schema-graphql* añadimos un nuevo tipo:
+
+~~~
+type Mutation {
+  "Añadir nuevo curso del al academia"
+  cursoNuevo(curso: CursoInput!): Curso!
+  "Modificar curso del al academia existente"
+  modificarCurso(curso: CursoInput!): Curso!
+  "Eliminar curso del al academia seleccionado por su ID"
+  eliminarCurso(id: ID!): Curso!
+}
+~~~
+
+En el directorio *resolvers* creamos un nuevo fichero *mutation.ts* donde definiremos las distintas acciones más adelante.
+
+~~~
+import { IResolvers } from 'graphql-tools';
+import _ from 'lodash';
+
+const mutation: IResolvers = {
+
+}
+
+export default mutation;
+~~~
+
+Debemos añadir este archivo al *resolversMap.ts*
+
+~~~
+const resolversMap: IResolvers = {
+  ...query,
+  ...type,
+  ...mutation,
+}
+~~~
+
+<a name="input"></a>
+
+## 15. Definición del input CursoInput
+
+En el punto anterior indicamos que el parámetor curso para añadir/modificar un curso era del tipo CursoInput.
+
+Definimos este tipo en *schema.graphql* tomando como referencia las propiedades del type *Curso*:
+
+~~~
+input CursoInput {
+  id: ID
+  title: String!
+  description: String
+  clases: Int!
+  time: Float
+  level: Nivel
+  logo: String!
+  path: String!
+  teacher: String!
+}
+~~~
+
+En este caso ID no puede ser required porque al crear el curso no tenemos su valor y va como null. Del mismo modo, no incluimos los atributos reviews ni students porque al crear un nuevo curso estas propiedades no existen.
+
+<hr>
+
+<a name="new-course"></a>
+
+## 15. Añadir un nuevo curso
+
+En el archivo *mutation.ts* añadimos el mutation para añadir un nuevo curso:
+
+~~~
+  Mutation: {
+    cursoNuevo(__: void, { curso }): any {
+      const nuevoCurso = {
+        id: String(database.cursos.length + 1),
+        title: curso.title,
+        description: curso.description,
+        clases: curso.clases, 
+        time: curso.time, 
+        level: curso.level,
+        logo: curso.logo, 
+        path: curso.path,
+        teacher: curso.teacher, 
+        reviews: [],
+        students: []
+      };
+      database.cursos.push(nuevoCurso);
+      return nuevoCurso;
+    }
+  }
+~~~
+
+Una vez hecho esto, ya podemos añadir un nuevo curso a través de apollo server:
+
+![Imagen4](./images/image4.png)
+
+<hr>
+
+<a name="validations"></a>
+
+## 16. Validaciones para no duplicar datos
+
+Para realizar esta validación, en el mutation ponemos una condición que compruebe que el nuevo curso no existe antes de formar el objeto nuevoCurso:
+
+~~~
+  if (database.cursos.find( item => curso.title === item.title)) {
+    return {
+      id: -1,
+      title: 'El curso ya existe con este título',
+      clases: 0, 
+      logo: '', 
+      path: '',
+      teacher: '',
+      reviews: [],
+    }
+  }
+~~~
+
+<hr>
+
+<a name="modify-course"></a>
+
+## 17. Modificar un curso
+
+Creamos el nuevo mutation:
+
+~~~
+modificarCurso(__: void, { curso }): any {
+  const foundIndex = _.findIndex(database.cursos, item => curso.id === item.id)
+  if (foundIndex > 0) {
+    database.cursos[foundIndex] = { ...database.cursos[0], ...curso };
+    return database.cursos[foundIndex];
+  }
+
+  return {
+    id: -1,
+    title: 'No existe curso con este id',
+    clases: 0, 
+    logo: '', 
+    path: '',
+    teacher: '',
+    reviews: [],
+  }
+}
+~~~
+
+<hr>
+
+<a name="delete-course"></a>
+
+## 18. Eliminar un curso
+
+Creamos el nuevo mutation:
+
+~~~
+    eliminarCurso(__: void, { id }): any {
+      const found = _.remove(database.cursos, item => id === item.id)
+      return found[0] || {
+        id: -1,
+        title: 'No existe curso con este id',
+        clases: 0, 
+        logo: '', 
+        path: '',
+        teacher: '',
+        reviews: [],
+      }
+    }
+~~~
