@@ -73,7 +73,7 @@ Creamos la carpeta *src* y dentro de ella otra carpeta *data* donde pondremos lo
 
 Creamos un archivo *data.store.ts* para importar los JSON.
 
-~~~
+~~~javascript
 import cursos from './courses.json';
 import estudiantes from './students.json';
 
@@ -91,7 +91,7 @@ export const database = {
 
 Configuramos los scripts del *package.json*
 
-~~~
+~~~json
   "scripts": {
     "start": "node build/server.js",
     "build": "tsc -p . && ncp src/shchema build/schema",
@@ -102,7 +102,7 @@ Configuramos los scripts del *package.json*
 
 Configuramos el servidor node express con los parámetros básicos
 
-~~~
+~~~javascript
 import compression from 'compression';
 import cors from 'cors';
 import { createServer } from 'http';
@@ -128,7 +128,7 @@ createServer(app).listen(
 
 Creamos un directorio *schema* dentro de *src* y en su interior el archivo *schema.graphql* en el que definiremos los tipos que vamos a necesitar en función de los datos que tenemos:
 
-~~~
+~~~graphql
 type Query {
   estudiantes: String
 }
@@ -178,8 +178,8 @@ type Valoracion {
 
 Creamos una carpeta *resolvers* en *src* con los siguientes archivos:
 
-~~~
-\\query.ts
+- *query.ts*
+~~~js
 import { IResolvers } from 'graphql-tools';
 
 const query: IResolvers = {
@@ -193,8 +193,8 @@ const query: IResolvers = {
 export default query;
 ~~~
 
-~~~
-\\resolversMap.ts
+- *resolversMap.ts*
+~~~js
 import { IResolvers } from 'graphql-tools';
 import query from './query';
 
@@ -207,7 +207,7 @@ export default resolversMap;
 
 En la carpeta *src/schema* creamos un archivo *index.ts* que contendrá lo siguiente:
 
-~~~
+~~~js
 import { GraphQLSchema } from 'graphql';
 import 'graphql-import-node';
 import { makeExecutableSchema } from 'graphql-tools';
@@ -230,7 +230,7 @@ export default schema;
 
 Modificamos *server.ts*
 
-~~~
+~~~js
 ...
 import { ApolloServer } from 'apollo-server-express';
 import schema from './schema/index';
@@ -264,7 +264,7 @@ createServer(app).listen(
 
 Modificamos en *schema.graphql* la query:
 
-~~~
+~~~graphql
 type Query {
   "Lista de los estudiantes de la academia"
   estudiantes: [Estudiante!]!
@@ -273,7 +273,7 @@ type Query {
 
 Igualmente modificamos en *resolvers/query.ts* la constante **query**:
 
-~~~
+~~~js
 const query: IResolvers = {
   Query: {
     estudiantes(): any {
@@ -291,7 +291,7 @@ Para el caso de querer recuperar la información de los cursos de cada estudiant
 
 Creamos en la carpeta *resolvers* un nuevo archivo *types.ts*:
 
-~~~
+~~~js
 import { IResolvers } from 'graphql-tools';
 import { database } from '../data/data.store';
 import _ from 'lodash';
@@ -313,7 +313,7 @@ export default type;
 
 Debemos añadir el nuevo resolver a *resolvers/resolverMap.ts*
 
-~~~
+~~~js
 ...
   import type from './type';
 
@@ -332,7 +332,7 @@ Debemos añadir el nuevo resolver a *resolvers/resolverMap.ts*
 
 Primero modificamos *schema.graphql* para añadir la query de un solo estudiante:
 
-~~~
+~~~graphql
 type Query {
   "Lista de los estudiantes de la academia"
   estudiantes: [Estudiante!]!,
@@ -343,7 +343,7 @@ type Query {
 
 Luego añadimos el nuevo resolver para obtener un solo estudiante a *resolvers/query.ts*:
 
-~~~
+~~~js
 const query: IResolvers = {
   Query: {
     estudiantes(): any {
@@ -362,7 +362,7 @@ Con esto ya tenemos disponible la info en la api.
 
 En caso de que el elemento que buscamos no se encuentre, podemos devolver una respuesta que mantenga el formato que se espera, pero que indique de forma clara que no se han encontrado registros. Para conseguirlo, modificamos el resolver:
 
-~~~
+~~~js
 ...
   estudiante(__: void, { id }): any {
     const found = database.estudiantes.find( estudiante => estudiante.id === id );
@@ -386,7 +386,7 @@ En caso de que el elemento que buscamos no se encuentre, podemos devolver una re
 
 Prodedemos de igual forma que hicimos para la lista de estudiantes: Primero modificamos la query en el schema.
 
-~~~
+~~~graphql
 type Query {
   "Lista de los estudiantes de la academia"
   estudiantes: [Estudiante!]!,
@@ -399,7 +399,7 @@ type Query {
 
 Luego modificamos el resolver en *query.ts*:
 
-~~~
+~~~js
 const query: IResolvers = {
   Query: {
   ...
@@ -417,7 +417,7 @@ const query: IResolvers = {
 
 Procedemos de la misma forma, modificando primero el schema:
 
-~~~
+~~~graphql
 type Query {
   ...
   "Información del curso de la academia seleccionado por ID"
@@ -427,7 +427,7 @@ type Query {
 
 Luego modificamos el resolver:
 
-~~~
+~~~js
 const query: IResolvers = {
   Query: {
     ...
@@ -455,7 +455,7 @@ const query: IResolvers = {
 
 Vamos también a añadir un nuevo resolver para poder obtener los estudiantes que están inscritos a un curso. Para ello modificamos *resolvers/type.ts*:
 
-~~~
+~~~js
 const type: IResolvers = {
   ...
 Curso: {
@@ -485,7 +485,7 @@ Una vez hemos terminado de configurar las **queries** para obtener datos, vamos 
 
 En *schema-graphql* añadimos un nuevo tipo:
 
-~~~
+~~~graphql
 type Mutation {
   "Añadir nuevo curso del al academia"
   cursoNuevo(curso: CursoInput!): Curso!
@@ -498,7 +498,7 @@ type Mutation {
 
 En el directorio *resolvers* creamos un nuevo fichero *mutation.ts* donde definiremos las distintas acciones más adelante.
 
-~~~
+~~~js
 import { IResolvers } from 'graphql-tools';
 import _ from 'lodash';
 
@@ -511,7 +511,7 @@ export default mutation;
 
 Debemos añadir este archivo al *resolversMap.ts*
 
-~~~
+~~~js
 const resolversMap: IResolvers = {
   ...query,
   ...type,
@@ -527,7 +527,7 @@ En el punto anterior indicamos que el parámetor curso para añadir/modificar un
 
 Definimos este tipo en *schema.graphql* tomando como referencia las propiedades del type *Curso*:
 
-~~~
+~~~graphql
 input CursoInput {
   id: ID
   title: String!
@@ -551,7 +551,7 @@ En este caso ID no puede ser required porque al crear el curso no tenemos su val
 
 En el archivo *mutation.ts* añadimos el mutation para añadir un nuevo curso:
 
-~~~
+~~~graphql
   Mutation: {
     cursoNuevo(__: void, { curso }): any {
       const nuevoCurso = {
@@ -585,7 +585,7 @@ Una vez hecho esto, ya podemos añadir un nuevo curso a través de apollo server
 
 Para realizar esta validación, en el mutation ponemos una condición que compruebe que el nuevo curso no existe antes de formar el objeto nuevoCurso:
 
-~~~
+~~~js
   if (database.cursos.find( item => curso.title === item.title)) {
     return {
       id: -1,
@@ -607,7 +607,7 @@ Para realizar esta validación, en el mutation ponemos una condición que compru
 
 Creamos el nuevo mutation:
 
-~~~
+~~~js
 modificarCurso(__: void, { curso }): any {
   const foundIndex = _.findIndex(database.cursos, item => curso.id === item.id)
   if (foundIndex > 0) {
@@ -635,7 +635,7 @@ modificarCurso(__: void, { curso }): any {
 
 Creamos el nuevo mutation:
 
-~~~
+~~~js
     eliminarCurso(__: void, { id }): any {
       const found = _.remove(database.cursos, item => id === item.id)
       return found[0] || {
